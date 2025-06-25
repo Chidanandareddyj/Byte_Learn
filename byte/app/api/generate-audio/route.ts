@@ -114,40 +114,55 @@ export async function POST(request: Request) {
     if (!script) {
       return Response.json({ error: "Script not found for the given prompt ID" }, { status: 404 });
      }    // Extract narration text, supporting both new dual-script format and legacy formats
-    let scriptText: string;
+    let scriptText: string = '';
     try {
       const rawScript = JSON.parse(script.script_text);
       
-      // Debug: Log the raw script structure
-      console.log("Raw script structure:", JSON.stringify(rawScript, null, 2));
-      console.log("Available keys:", Object.keys(rawScript));
+      // Debug: Log the raw script structure keys
+      console.log("Raw script structure keys:", Object.keys(rawScript));
       
-      // Check if it's a Manim script with narration field (our current format)
-      if (rawScript?.narration && typeof rawScript.narration === 'string') {
-        scriptText = rawScript.narration;
-        console.log("✅ Using narration field from Manim script format");
+      // Priority 1: Check for fullNarration field (new structure)
+      if (rawScript?.fullNarration && typeof rawScript.fullNarration === 'string') {
+        scriptText = rawScript.fullNarration;
+        console.log("✅ Using fullNarration field from new structure");
       }
-      // Check if it's the new dual-script format
+      // Priority 2: Check if it's a Manim script with narration field (legacy format)
+      else if (rawScript?.narration && typeof rawScript.narration === 'string') {
+        scriptText = rawScript.narration;
+        console.log("✅ Using narration field from legacy Manim script format");
+      }
+      // Priority 3: Extract from sections narration (new structure)
+      else if (rawScript?.sections && Array.isArray(rawScript.sections)) {
+        const sectionTexts = rawScript.sections
+          .map((section: any) => section.narration)
+          .filter((text: string) => text && text.trim());
+        
+        if (sectionTexts.length > 0) {
+          scriptText = sectionTexts.join(' ');
+          console.log("✅ Using sections narration from new structure");
+        }
+      }
+      // Priority 4: Check if it has ttsNarration with fullScript (dual-script format)
       else if (rawScript?.ttsNarration?.fullScript) {
         scriptText = rawScript.ttsNarration.fullScript;
         console.log("✅ Using TTS narration script from dual-script format");
       } 
-      // Check if it has ttsNarration with segments (fallback)
+      // Priority 5: Check if it has ttsNarration with segments (fallback)
       else if (rawScript?.ttsNarration?.segments && Array.isArray(rawScript.ttsNarration.segments)) {
         scriptText = rawScript.ttsNarration.segments.map((s: any) => s.text).join('. ');
         console.log("✅ Using TTS segments from dual-script format");
       }
-      // Check if it's the remotion script format (legacy support)
+      // Priority 6: Check if it's the remotion script format (legacy support)
       else if (rawScript?.remotionScript?.scenes && Array.isArray(rawScript.remotionScript.scenes)) {
         scriptText = rawScript.remotionScript.scenes.map((s: any) => s.text).join('. ');
         console.log("✅ Using remotion script scenes as fallback");
       }
-      // Check if it's old single script format with scenes
+      // Priority 7: Check if it's old single script format with scenes
       else if (rawScript?.scenes && Array.isArray(rawScript.scenes)) {
         scriptText = rawScript.scenes.map((s: any) => s.text).join('. ');
         console.log("✅ Using legacy scenes format");
       } 
-      // Fallback: If it has steps (like our Manim format), combine the text parts
+      // Priority 8: If it has steps (like our Manim format), combine the text parts
       else if (rawScript?.steps && Array.isArray(rawScript.steps)) {
         scriptText = rawScript.steps
           .map((step: any) => step.text)
@@ -156,13 +171,13 @@ export async function POST(request: Request) {
         console.log("✅ Using steps text as fallback narration");
       }
       else {
-        scriptText = script.script_text;
+        scriptText = script.script_text || '';
         console.log("❌ Using raw script text as final fallback");
       }
     } catch (parseError) {
       // Fallback: script_text is plain text
       console.log("❌ JSON parse error, using plain text fallback:", parseError);
-      scriptText = script.script_text;
+      scriptText = script.script_text || '';
     }    // Clean the script text to remove unwanted characters that TTS reads aloud
     scriptText = cleanTextForTTS(scriptText);
     

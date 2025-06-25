@@ -1,0 +1,103 @@
+{
+  "title": "QuadraticFormulaExplained",
+  "totalDuration": 300,
+  "introduction": {
+    "text": "Welcome to our exploration of the quadratic formula",
+    "duration": 30
+  },
+  "sections": [
+    {
+      "title": "Introduction to Quadratic Equations",
+      "narration": "Quadratic equations are fundamental in mathematics. They appear in the form ax squared plus bx plus c equals zero, where a, b, and c are constants and a is not zero.",
+      "duration": 45,
+      "visualSequence": [
+        {
+          "type": "text_display",
+          "content": "Quadratic Equations",
+          "timing": [0, 10]
+        },
+        {
+          "type": "math_equation",
+          "content": "ax^2 + bx + c = 0",
+          "timing": [10, 30]
+        },
+        {
+          "type": "text_display",
+          "content": "where a ≠ 0",
+          "timing": [30, 45]
+        }
+      ]
+    },
+    {
+      "title": "The Quadratic Formula",
+      "narration": "The quadratic formula provides a direct method to solve any quadratic equation. The formula is x equals negative b plus or minus the square root of b squared minus 4ac, all divided by 2a.",
+      "duration": 60,
+      "visualSequence": [
+        {
+          "type": "text_display",
+          "content": "The Solution Formula",
+          "timing": [0, 15]
+        },
+        {
+          "type": "math_equation",
+          "content": "x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}",
+          "timing": [15, 45]
+        },
+        {
+          "type": "highlight_parts",
+          "content": "x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}",
+          "timing": [45, 60]
+        }
+      ]
+    },
+    {
+      "title": "Working Through an Example",
+      "narration": "Let's solve x squared minus 5x plus 6 equals zero. First, we identify a equals 1, b equals negative 5, and c equals 6. Then we substitute these values into our formula.",
+      "duration": 75,
+      "visualSequence": [
+        {
+          "type": "math_equation",
+          "content": "x^2 - 5x + 6 = 0",
+          "timing": [0, 20]
+        },
+        {
+          "type": "step_by_step",
+          "content": "Identify coefficients|a = 1, b = -5, c = 6|Substitute into formula",
+          "timing": [20, 50]
+        },
+        {
+          "type": "math_equation",
+          "content": "x = \\frac{5 \\pm \\sqrt{25 - 24}}{2}",
+          "timing": [50, 75]
+        }
+      ]
+    },
+    {
+      "title": "Solving and Graphing",
+      "narration": "The discriminant 25 minus 24 equals 1, so we get x equals 5 plus or minus 1, divided by 2. This gives us x equals 3 and x equals 2. These are the x-intercepts of the parabola.",
+      "duration": 70,
+      "visualSequence": [
+        {
+          "type": "math_equation",
+          "content": "x = \\frac{5 \\pm 1}{2}",
+          "timing": [0, 25]
+        },
+        {
+          "type": "step_by_step",
+          "content": "x = 3|x = 2",
+          "timing": [25, 45]
+        },
+        {
+          "type": "graph_plot",
+          "content": "parabola with x-intercepts",
+          "timing": [45, 70]
+        }
+      ]
+    }
+  ],
+  "conclusion": {
+    "text": "The quadratic formula is a powerful tool for solving any quadratic equation",
+    "duration": 20
+  },
+  "fullNarration": "Welcome to our exploration of the quadratic formula. Quadratic equations are fundamental in mathematics. They appear in the form ax squared plus bx plus c equals zero, where a, b, and c are constants and a is not zero. The quadratic formula provides a direct method to solve any quadratic equation. The formula is x equals negative b plus or minus the square root of b squared minus 4ac, all divided by 2a. Let's solve x squared minus 5x plus 6 equals zero. First, we identify a equals 1, b equals negative 5, and c equals 6. Then we substitute these values into our formula. The discriminant 25 minus 24 equals 1, so we get x equals 5 plus or minus 1, divided by 2. This gives us x equals 3 and x equals 2. These are the x-intercepts of the parabola. The quadratic formula is a powerful tool for solving any quadratic equation."
+}
