@@ -1,0 +1,22 @@
+{
+  "title": "LaTeX Test Video",
+  "steps": [
+    {
+      "text": "Testing basic math equations",
+      "math": "x^2 + y^2 = z^2"
+    },
+    {
+      "text": "Quadratic formula",
+      "math": "\\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}"
+    },
+    {
+      "text": "Integration example",
+      "math": "\\int_{0}^{\\infty} e^{-x} dx = 1"
+    },
+    {
+      "text": "Summation notation",
+      "math": "\\sum_{i=1}^{n} i = \\frac{n(n+1)}{2}"
+    }
+  ],
+  "narration": "This video demonstrates proper LaTeX rendering in Manim."
+}

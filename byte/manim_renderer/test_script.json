@@ -1,0 +1,30 @@
+{
+  "title": "QuadraticFormula",
+  "steps": [
+    {
+      "text": "Let's explore the quadratic formula",
+      "math": "ax^2 + bx + c = 0"
+    },
+    {
+      "text": "The quadratic formula solves for x",
+      "math": "x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}"
+    },
+    {
+      "text": "Let's work through an example",
+      "math": "x^2 - 5x + 6 = 0"
+    },
+    {
+      "text": "Here a = 1, b = -5, c = 6",
+      "math": "x = \\frac{5 \\pm \\sqrt{25 - 24}}{2}"
+    },
+    {
+      "text": "Simplifying the discriminant",
+      "math": "x = \\frac{5 \\pm 1}{2}"
+    },
+    {
+      "text": "So our solutions are",
+      "math": "x = 3 \\text{ or } x = 2"
+    }
+  ],
+  "narration": "Welcome to our exploration of the quadratic formula. The quadratic formula is a powerful tool used to solve quadratic equations of the form ax squared plus bx plus c equals zero. The formula itself is x equals negative b plus or minus the square root of b squared minus 4ac, all divided by 2a. Let's work through a concrete example to see how this works. Consider the equation x squared minus 5x plus 6 equals zero. In this case, a equals 1, b equals negative 5, and c equals 6. Substituting these values into our formula, we get x equals 5 plus or minus the square root of 25 minus 24, all divided by 2. The discriminant, 25 minus 24, equals 1, so we have x equals 5 plus or minus 1, divided by 2. This gives us two solutions: x equals 3 and x equals 2. These are the x-intercepts of the parabola represented by our quadratic equation."
+}
