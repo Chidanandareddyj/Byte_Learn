@@ -17,6 +17,7 @@ export async function POST(request: NextRequest) {
   try {
     // Check if supabaseAdmin is available (server-side only)
     if (!supabaseAdmin) {
+      console.error("Supabase admin client not available. Check environment variables.");
       return NextResponse.json({ error: "Server configuration error" }, { status: 500 })
     }
 

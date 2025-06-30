@@ -32,6 +32,12 @@ export function LoginForm({
     setLoading(true);
     setError(null);
 
+    if (!supabase) {
+      setError("Supabase client not available. Please check configuration.");
+      setLoading(false);
+      return;
+    }
+
     try {
       if (isSignUp) {
         const { error } = await supabase.auth.signUp({
@@ -58,6 +64,12 @@ export function LoginForm({
 
   const handleGoogleLogin = async () => {
     setError(null);
+    
+    if (!supabase) {
+      setError("Supabase client not available. Please check configuration.");
+      return;
+    }
+    
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {

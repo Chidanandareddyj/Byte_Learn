@@ -2,6 +2,9 @@ import { supabase, supabaseAdmin } from "@/lib/supabaseClient";
 
 export async function getpromptbyID(promptID: string) {
   try {
+    if (!supabase) {
+      throw new Error("Supabase client not available");
+    }
     const { data, error } = await supabase
       .from("prompts")
       .select("*")
@@ -25,6 +28,9 @@ export async function saveScript(
   scriptText: string | object
 ): Promise<ScriptData | undefined> {
   try {
+    if (!supabase) {
+      throw new Error("Supabase client not available");
+    }
     const { data, error } = (await supabase
       .from("scripts")
       .insert({
@@ -57,6 +63,9 @@ export async function getScriptByPromptId(
   promptId: string
 ): Promise<Script | null> {
   try {
+    if (!supabase) {
+      throw new Error("Supabase client not available");
+    }
     const { data, error } = await supabase
       .from("scripts")
       .select("*")
@@ -87,6 +96,9 @@ export async function saveAudio(scriptId: string, audioUrl: string) {
 }
 
 export async function getAudioByScriptId(scriptId: string) {
+  if (!supabase) {
+    throw new Error("Supabase client not available");
+  }
   const { data, error } = await supabase
     .from('audios')
     .select('*')
@@ -113,6 +125,9 @@ export async function saveVideo(audioId: string, videoUrl: string) {
 }
 
 export async function getVideoByAudioId(audioId: string) {
+  if (!supabase) {
+    throw new Error("Supabase client not available");
+  }
   const { data, error } = await supabase
     .from('videos')
     .select('*')
@@ -126,6 +141,9 @@ export async function getVideoByAudioId(audioId: string) {
 
 // Get video by prompt ID (through script and audio relationships)
 export async function getVideoByPromptId(promptId: string) {
+  if (!supabase) {
+    throw new Error("Supabase client not available");
+  }
   const { data, error } = await supabase
     .from('videos')
     .select(`
