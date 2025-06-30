@@ -11,15 +11,15 @@ export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"form">) {
-  const params = new URLSearchParams(window.location.search);
   const router = useRouter();
 
   React.useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
     const accessToken = params.get("access_token");
     if (accessToken) {
       router.replace("/my-videos");
     }
-  }, [params, router]);
+  }, [router]);
 
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
@@ -48,8 +48,9 @@ export function LoginForm({
         if (error) throw error;
         router.replace("/my-videos");
       }
-    } catch (err: any) {
-      setError(err.message || "Something went wrong.");
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Something went wrong.';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

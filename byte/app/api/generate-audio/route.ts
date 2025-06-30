@@ -4,11 +4,10 @@ import util from "util";
 import os from "os"; // Added import for os module
 import { getScriptByPromptId, saveAudio } from "@/lib/databse";
 import { supabaseAdmin } from "@/lib/supabaseClient";
-
-const textToSpeech = require("@google-cloud/text-to-speech");
+import { TextToSpeechClient, protos } from "@google-cloud/text-to-speech";
 
 // Initialize Google Cloud client with explicit credentials
-let client: any;
+let client: TextToSpeechClient | null;
 
 try {
   // Explicitly provide credentials path
@@ -22,7 +21,7 @@ try {
   // Read and parse credentials
   const credentials = JSON.parse(fs.readFileSync(credentialsPath, 'utf8'));
   
-  client = new textToSpeech.TextToSpeechClient({
+  client = new TextToSpeechClient({
     credentials: credentials,
     projectId: credentials.project_id,
   });
@@ -33,7 +32,7 @@ try {
   
   try {
     // Fallback: try using environment variable authentication
-    client = new textToSpeech.TextToSpeechClient();
+    client = new TextToSpeechClient();
     console.log("Google Cloud TTS client initialized successfully with environment variable");
   } catch (envError) {
     console.error("Failed to initialize Google Cloud TTS client with environment variable:", envError);
@@ -90,7 +89,7 @@ function combineAudioBuffers(audioBuffers: Buffer[]): Buffer {
 }
 
 export async function POST(request: Request) {
-  let tempPaths: string[] = []; // Keep track of all temp files for cleanup
+  const tempPaths: string[] = []; // Keep track of all temp files for cleanup
   let finalTempPath: string | null = null;
 
   try {
@@ -134,7 +133,7 @@ export async function POST(request: Request) {
       // Priority 3: Extract from sections narration (new structure)
       else if (rawScript?.sections && Array.isArray(rawScript.sections)) {
         const sectionTexts = rawScript.sections
-          .map((section: any) => section.narration)
+          .map((section: { narration: string }) => section.narration)
           .filter((text: string) => text && text.trim());
         
         if (sectionTexts.length > 0) {
@@ -149,23 +148,23 @@ export async function POST(request: Request) {
       } 
       // Priority 5: Check if it has ttsNarration with segments (fallback)
       else if (rawScript?.ttsNarration?.segments && Array.isArray(rawScript.ttsNarration.segments)) {
-        scriptText = rawScript.ttsNarration.segments.map((s: any) => s.text).join('. ');
+        scriptText = rawScript.ttsNarration.segments.map((s: { text: string }) => s.text).join('. ');
         console.log("✅ Using TTS segments from dual-script format");
       }
       // Priority 6: Check if it's the remotion script format (legacy support)
       else if (rawScript?.remotionScript?.scenes && Array.isArray(rawScript.remotionScript.scenes)) {
-        scriptText = rawScript.remotionScript.scenes.map((s: any) => s.text).join('. ');
+        scriptText = rawScript.remotionScript.scenes.map((s: { text: string }) => s.text).join('. ');
         console.log("✅ Using remotion script scenes as fallback");
       }
       // Priority 7: Check if it's old single script format with scenes
       else if (rawScript?.scenes && Array.isArray(rawScript.scenes)) {
-        scriptText = rawScript.scenes.map((s: any) => s.text).join('. ');
+        scriptText = rawScript.scenes.map((s: { text: string }) => s.text).join('. ');
         console.log("✅ Using legacy scenes format");
       } 
       // Priority 8: If it has steps (like our Manim format), combine the text parts
       else if (rawScript?.steps && Array.isArray(rawScript.steps)) {
         scriptText = rawScript.steps
-          .map((step: any) => step.text)
+          .map((step: { text: string }) => step.text)
           .filter((text: string) => text && text.trim())
           .join('. ');
         console.log("✅ Using steps text as fallback narration");
@@ -194,7 +193,7 @@ export async function POST(request: Request) {
     
     const textBytes = Buffer.byteLength(scriptText, 'utf8');
     
-    let audioBuffers: Buffer[] = [];
+    const audioBuffers: Buffer[] = [];
     const tempDir = os.tmpdir();
 
     if (textBytes > 4500) {
@@ -205,14 +204,14 @@ export async function POST(request: Request) {
       // Generate audio for each chunk
       for (let i = 0; i < textChunks.length; i++) {
         const chunk = textChunks[i];
-        const ttsRequest = {
+        const ttsRequest: protos.google.cloud.texttospeech.v1.ISynthesizeSpeechRequest = {
           input: { text: chunk },
           voice: { 
             languageCode: "en-IN", 
             name: "en-IN-Chirp3-HD-Achernar",  
           },
           audioConfig: { 
-            audioEncoding: "MP3",
+            audioEncoding: protos.google.cloud.texttospeech.v1.AudioEncoding.MP3,
             // effectsProfileId: ["telephony-class-application"],  // Enhance for speech
             // speakingRate: 0.95,  // Slightly slower for better comprehension
             // pitch: 0.0,  // Natural pitch
@@ -221,21 +220,21 @@ export async function POST(request: Request) {
         };
 
         try {
-          const [response] = await client.synthesizeSpeech(ttsRequest);
+          const [response] = await client!.synthesizeSpeech(ttsRequest);
           
           const chunkTempPath = path.join(tempDir, `audio-chunk-${promptId}-${i}.mp3`);
           tempPaths.push(chunkTempPath);
           
           await util.promisify(fs.writeFile)(
             chunkTempPath,
-            response.audioContent,
+            response.audioContent || Buffer.alloc(0),
             "binary"
           );
           
           audioBuffers.push(fs.readFileSync(chunkTempPath));
-        } catch (ttsError: any) {
+        } catch (ttsError: unknown) {
           console.error(`TTS synthesis error for chunk ${i}:`, ttsError);
-          if (ttsError.code === 16) {
+          if (ttsError && typeof ttsError === 'object' && 'code' in ttsError && ttsError.code === 16) {
             return Response.json({ 
               error: "Google Cloud authentication failed. Please check your service account credentials." 
             }, { status: 500 });
@@ -255,14 +254,14 @@ export async function POST(request: Request) {
       );
     } else {
       // Text is short enough, use single request
-      const ttsRequest = {
+      const ttsRequest: protos.google.cloud.texttospeech.v1.ISynthesizeSpeechRequest = {
         input: { text: scriptText },
         voice: { 
           languageCode: "en-IN", 
           name: "en-IN-Chirp3-HD-Achernar",  
         },
         audioConfig: { 
-          audioEncoding: "MP3",
+          audioEncoding: protos.google.cloud.texttospeech.v1.AudioEncoding.MP3,
           // effectsProfileId: ["telephony-class-application"],  // Enhance for speech
           // speakingRate: 0.95,  // Slightly slower for better comprehension
           // pitch: 0.0,  // Natural pitch
@@ -271,18 +270,18 @@ export async function POST(request: Request) {
       };
 
       try {
-        const [response] = await client.synthesizeSpeech(ttsRequest);
+        const [response] = await client!.synthesizeSpeech(ttsRequest);
         
         finalTempPath = path.join(tempDir, `audio-${promptId}.mp3`);
         
         await util.promisify(fs.writeFile)(
           finalTempPath,
-          response.audioContent,
+          response.audioContent || Buffer.alloc(0),
           "binary"
         );
-      } catch (ttsError: any) {
+      } catch (ttsError: unknown) {
         console.error("TTS synthesis error:", ttsError);
-        if (ttsError.code === 16) {
+        if (ttsError && typeof ttsError === 'object' && 'code' in ttsError && ttsError.code === 16) {
           return Response.json({ 
             error: "Google Cloud authentication failed. Please check your service account credentials." 
           }, { status: 500 });
@@ -291,7 +290,7 @@ export async function POST(request: Request) {
       }
     }    const audiobuffer = fs.readFileSync(finalTempPath);
     const filepath = `${promptId}.mp3`;
-    const { data: uploadData, error: uploadError } = await supabaseAdmin.storage
+    const { error: uploadError } = await supabaseAdmin.storage
       .from("audio-files")
       .upload(filepath, audiobuffer, {
         contentType: "audio/mpeg",

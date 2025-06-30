@@ -159,6 +159,6 @@ Given the user prompt "${prompt}", generate a JSON with this EXACT structure:
 }
 
 // Helper function to extract narration text from scenes if needed
-function extractNarrationFromScenes(scenes: any[]): string {
-  return scenes.map((scene) => scene.text).join(" ");
-}
+// function extractNarrationFromScenes(scenes: { text: string }[]): string {
+//   return scenes.map((scene) => scene.text).join(" ");
+// }

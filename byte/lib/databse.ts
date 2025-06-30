@@ -35,7 +35,7 @@ export async function saveScript(
             : scriptText,
       })
       .select()
-      .single()) as any;
+      .single()) as { data: ScriptData; error: unknown };
 
     if (error) throw error;
     return data;

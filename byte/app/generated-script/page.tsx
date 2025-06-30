@@ -1,16 +1,27 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Silk from "@/components/ui/Silk";
 import { Navbar } from "@/components/Navbar";
 
-export default function GenerateScriptPage() {
+interface ScriptStep {
+  text?: string;
+  math?: string;
+  narration?: string;
+}
+
+interface Script {
+  title?: string;
+  steps?: ScriptStep[];
+}
+
+function GenerateScriptContent() {
   const searchParams = useSearchParams()
   const promptId = searchParams.get('id')
   const router = useRouter()
   const [status, setStatus] = useState('Generating script...')
-  const [script, setScript] = useState<any>(null)
+  const [script, setScript] = useState<Script | null>(null)
   const [audioUrl, setAudioUrl] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -45,9 +56,10 @@ export default function GenerateScriptPage() {
         setAudioUrl(audioResult.audioUrl)
 
         setStatus('✅ Audio ready!')
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error(err)
-        setStatus(`❌ ${err.message}`)
+        const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred'
+        setStatus(`❌ ${errorMessage}`)
       } finally {
         setLoading(false)
       }
@@ -77,7 +89,7 @@ export default function GenerateScriptPage() {
                     {script.title}
                   </h3>
                   <div className="space-y-2 max-h-60 overflow-y-auto">
-                    {script.steps && script.steps.map((step: any, idx: number) => (
+                    {script.steps && script.steps.map((step: ScriptStep, idx: number) => (
                       <div key={idx} className="text-xs bg-gray-50 p-3 rounded border-l-2 border-green-400 mb-2">
                         {step.text && <div className="mb-1"><strong>Text:</strong> {step.text}</div>}
                         {step.math && <div className="mb-1"><strong>Math:</strong> <span className="font-mono">{step.math}</span></div>}
@@ -120,5 +132,13 @@ export default function GenerateScriptPage() {
         </div>
       </main>
     </div>
+  )
+}
+
+export default function GenerateScriptPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <GenerateScriptContent />
+    </Suspense>
   )
 }

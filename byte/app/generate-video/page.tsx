@@ -1,11 +1,11 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { Navbar } from '@/components/Navbar'
 import Silk from '@/components/ui/Silk'
 
-export default function GenerateVideoPage() {
+function GenerateVideoContent() {
   const searchParams = useSearchParams()
   const promptId = searchParams.get('id')
   const router = useRouter()
@@ -48,10 +48,11 @@ export default function GenerateVideoPage() {
         setVideoUrl(result.videoUrl)
         setProgress(100)
         
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('Video generation error:', err)
-        setError(err.message)
-        setStatus(`❌ ${err.message}`)
+        const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred'
+        setError(errorMessage)
+        setStatus(`❌ ${errorMessage}`)
       } finally {
         setLoading(false)
       }
@@ -254,5 +255,13 @@ export default function GenerateVideoPage() {
         </div>
       </main>
     </div>
+  )
+}
+
+export default function GenerateVideoPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <GenerateVideoContent />
+    </Suspense>
   )
 }

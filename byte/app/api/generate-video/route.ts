@@ -12,7 +12,7 @@ const readFile = promisify(fs.readFile)
 const unlink = promisify(fs.unlink)
 
 export async function POST(request: NextRequest) {
-  let tempFiles: string[] = []
+  const tempFiles: string[] = []
   
   try {
     // Check if supabaseAdmin is available (server-side only)
@@ -53,11 +53,12 @@ export async function POST(request: NextRequest) {
     }
 
     // 3. Parse script data
-    let scriptData: any
+    let scriptData: Record<string, unknown>
     try {
       scriptData = JSON.parse(script.script_text)
       console.log(`📝 Parsed script data:`, scriptData)
     } catch (error) {
+      console.error('Script parsing error:', error)
       return NextResponse.json({ error: "Invalid script format" }, { status: 400 })
     }
 
