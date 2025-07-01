@@ -1,5 +1,5 @@
 // lib/supabaseClient.ts
-import { createClient } from '@supabase/supabase-js'
+import { createClient, SupabaseClient } from '@supabase/supabase-js'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -15,7 +15,7 @@ if (!supabaseUrl || !supabaseAnonKey) {
 // Client for browser/frontend operations
 export const supabase = hasValidSupabaseConfig()
   ? createClient(supabaseUrl!, supabaseAnonKey!)
-  : {} as any
+  : {} as SupabaseClient
 
 // Client for server-side operations with full permissions
 // Only available on server-side (API routes, server components)
